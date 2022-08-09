@@ -1,4 +1,5 @@
 import express from "express";
+import { parse } from "path";
 
 const app = express();
 
@@ -26,7 +27,20 @@ app.get("/eat/carrot", (req, res) => {
   });
 });
 
-app.get("/echo/:exampleRouteParameter", (req, res) => {
+app.get<{food:string}>("/eat/:food", (req, res) => {
+  const {food} = req.params
+  if (["a", "e", "i", "o", "u"].includes(food.charAt(0))) {
+    res.json({
+      message: `Yum yum - you ate an ${food}`
+    })} else {
+      res.json({
+        message: `Yum yum - you ate a ${food}`
+      })
+    }
+});
+
+
+app.get<{exampleRouteParameter : string}>("/echo/:exampleRouteParameter", (req, res) => {
   const echoContent = req.params.exampleRouteParameter;
   res.json({
     echo: echoContent,
@@ -34,7 +48,32 @@ app.get("/echo/:exampleRouteParameter", (req, res) => {
   });
 });
 
-app.get("/multiply/:numOne/:numTwo", (req, res) => {
+app.get<{phrase : string}>("/shout/:phrase", (req, res) => {
+  const shoutContent = req.params.phrase;
+  res.json({
+    shout: shoutContent.toUpperCase(),
+    message: `I am shouting back to you: ${shoutContent.toUpperCase()}`,
+  });
+});
+app.get<{numOne : string; numTwo : string; numThree? : string}>("/add/:numOne/:numTwo/:numThree?", (req, res) => {
+  const { numOne, numTwo, numThree } = req.params;
+  if (numThree === undefined) {
+    const addition = parseInt(numOne) + parseInt(numTwo)
+    res.json({
+      original : `${numOne} + ${numTwo}`,
+      result : addition
+    })
+  } else {
+    const addition = parseInt(numOne) + parseInt(numTwo) + parseInt(numThree)
+    res.json({
+      original : `${numOne} + ${numTwo} + ${numThree}`,
+      result : addition
+    })
+  };
+  
+});
+
+app.get<{numOne: string; numTwo:string}>("/multiply/:numOne/:numTwo", (req, res) => {
   /**
    * Note that `numOne` and `numTwo` are both typed as string.
    * (Hover over with your mouse to see!)
@@ -46,7 +85,7 @@ app.get("/multiply/:numOne/:numTwo", (req, res) => {
   const multiplication = parseInt(numOne) * parseInt(numTwo);
   res.json({
     original: `${numOne} x ${numTwo}`,
-    result: multiplication,
+    result: multiplication
   });
 });
 
